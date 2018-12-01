@@ -3,6 +3,8 @@
 
 dist: trusty
 language: rust
+rust:
+  - beta
 services: docker
 sudo: required
 env:
