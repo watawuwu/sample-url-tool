@@ -19,7 +19,7 @@ main() {
 
     cross rustc --bin $CRATE_NAME --target $TARGET --release -- -C lto
 
-    cp target/$TARGET/release/$CRATE_NAME $stage/ || cp target/$TARGET/release/$CRATE_NAME.exe $stage/
+    cp target/$TARGET/release/$CRATE_NAME $stage/ || cp target/$TARGET/release/$CRATE_NAME.exe
 
     cd $stage
     tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *

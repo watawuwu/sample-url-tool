@@ -5,6 +5,7 @@ dist: trusty
 language: rust
 rust:
   - beta
+services: docker
 sudo: required
 env:
   global:
@@ -15,23 +16,21 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
       os: osx
     - env: TARGET=x86_64-pc-windows-gnu
-
 before_install:
   - set -e
   - rustup self update
 
 install:
+  - sh .ci/install.sh
   - source ~/.cargo/env || true
-  - cargo install cross
 
 script:
-  - make test BUILDER=cross OPTION="--target $TARGET --release"
+  - bash .ci/script.sh
 
 after_script: set +e
 
 before_deploy:
-  - make build BUILDER=cross OPTION="--target $TARGET --release"
-  - tar czf ${CRATE_NAME}-${TRAVIS_TAG}-${TARGET}.tar.gz target/${TARGET}/release/${CRATE_NAME}
+  - sh .ci/before_deploy.sh
 
 deploy:
   api_key:
