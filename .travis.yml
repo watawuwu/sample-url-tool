@@ -3,6 +3,7 @@
 
 dist: trusty
 language: rust
+services: docker
 rust:
   - beta
 sudo: required
@@ -22,15 +23,14 @@ before_install:
 
 install:
   - source ~/.cargo/env || true
-  - cargo install cross
 
 script:
-  - make test BUILDER=cross OPTION="--target $TARGET --release"
+  - cross test --target $TARGET --release
 
 after_script: set +e
 
 before_deploy:
-  - make build BUILDER=cross OPTION="--target $TARGET --release"
+  - cross build --target $TARGET --release
   - tar czf ${CRATE_NAME}-${TRAVIS_TAG}-${TARGET}.tar.gz target/${TARGET}/release/${CRATE_NAME}
 
 deploy:
