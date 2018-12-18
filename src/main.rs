@@ -1,9 +1,10 @@
-use url::percent_encoding::percent_decode;
-use failure::Error;
-use structopt::StructOpt;
-use std::io::{self, Read};
+use atty::Stream;
+use failure::*;
 use log::*;
 use pretty_env_logger;
+use std::io::{self, Read};
+use structopt::StructOpt;
+use url::percent_encoding::percent_decode;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -13,28 +14,45 @@ struct Opt {
     input: Option<String>,
 }
 
+fn is_stdin(input: Option<&String>) -> bool {
+    let is_request = match input {
+        // 引数に "-" の場合は標準入力から読み込む
+        Some(i) if i == "-" => true,
+        _ => false,
+    };
+
+    // Terminalでなければ標準入力から読み込む
+    let is_pipe = !atty::is(Stream::Stdin);
+
+    is_request || is_pipe
+}
+
 fn read_from_stdin() -> Result<String> {
-    let stdio = io::stdin();
-    let mut handle = stdio.lock();
     let mut buf = String::new();
+    let stdin = io::stdin();
+    let mut handle = stdin.lock();
     handle.read_to_string(&mut buf)?;
+
     Ok(buf)
 }
 
 fn main() -> Result<()> {
     pretty_env_logger::init();
-    let opt = Opt::from_args();
+    let opt: Opt = Opt::from_args();
     debug!("opt: {:?}", opt);
 
-    let input = match opt.input  {
-        Some(i) => i,
-        None => read_from_stdin()?
-    };
-    if input.is_empty() {
-        Opt::clap().get_matches().usage();
+    if opt.input.is_none() && !is_stdin(opt.input.as_ref()) {
+        Opt::clap().print_help()?;
+        std::process::exit(1);
     }
 
-    Ok(println!("{}", decode(&input)?))
+    let input = match opt.input {
+        Some(i) => i,
+        None => read_from_stdin()?,
+    };
+
+    print!("{}", decode(&input)?);
+    Ok(())
 }
 
 fn decode(input: &str) -> Result<String> {
