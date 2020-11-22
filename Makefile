@@ -1,18 +1,15 @@
 # Const
 #===============================================================
-_name := url
+name := url
 
 # Option
 #===============================================================
 SHELL                   := /bin/bash
 LOG_LEVEL               := debug
-LOG                     := $(shell echo '$(_name)' | tr - _)=$(LOG_LEVEL)
+LOG                     := $(name)=$(LOG_LEVEL)
 PREFIX                  := $(HOME)/.cargo
 APP_ARGS                := "foo%20bar"
-CARGO_VERSION           := stable
-CARGO_OPTIONS           :=
 CARGO_SUB_OPTIONS       :=
-CARGO_COMMAND           := cargo +$(CARGO_VERSION) $(CARGO_OPTIONS)
 
 # Environment
 #===============================================================
@@ -22,31 +19,31 @@ export RUST_BACKTRACE=1
 # Task
 #===============================================================
 run: ## Execute a main.rs
-	$(CARGO_COMMAND) run $(CARGO_SUB_OPTIONS) $(APP_ARGS)
+	cargo run $(CARGO_SUB_OPTIONS) $(APP_ARGS)
 
 test: ## Run the tests
-	$(CARGO_COMMAND) test $(CARGO_SUB_OPTIONS) -- --nocapture
+	cargo test $(CARGO_SUB_OPTIONS) -- --nocapture
 
 check: ## Check syntax, but don't build object files
-	$(CARGO_COMMAND) check $(CARGO_SUB_OPTIONS)
+	cargo check $(CARGO_SUB_OPTIONS)
 
 build: ## Build all project
-	$(CARGO_COMMAND) build $(CARGO_SUB_OPTIONS)
+	cargo build $(CARGO_SUB_OPTIONS)
 
-release-build: lint ## Build all project
+release-build: ## Build all project
 	$(MAKE) build CARGO_SUB_OPTIONS="--release"
 
 clean: ## Remove the target directory
-	$(CARGO_COMMAND) clean
+	cargo clean
 
 install: ## Install to $(PREFIX) directory
-	$(CARGO_COMMAND) install --force --root $(PREFIX) --path .
+	cargo install --force --root $(PREFIX) --path .
 
 fmt: ## Run fmt
-	$(CARGO_COMMAND) fmt
+	cargo fmt
 
 clippy: ## Run clippy
-	$(CARGO_COMMAND) clippy
+	cargo clippy
 
 lint: fmt clippy ## Run fmt and clippy
 
